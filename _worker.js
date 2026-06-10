@@ -16,7 +16,7 @@ const UPSTREAM_JSON_ALI = 'https://dns.alidns.com/resolve';
 // ========== 静态 Cloudflare 域名 ==========
 const CF_STATIC_DOMAINS = [
     "twimg.com", "twitter.com", "x.com", "t.co",
-    "cloudflare-dns.com", "pages.dev", "workers.dev", "cloudflare.com", "lss1.ccwu.cc"
+    "cloudflare-dns.com", "pages.dev", "workers.dev", "cloudflare.com"
 ];
 const DEFAULT_CF_IP = "104.18.10.118";   // Cloudflare 默认优选 IP
 
