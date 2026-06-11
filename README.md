@@ -79,7 +79,70 @@
   将 DoH 地址设置为 `https://你的域名/ech`（注入 ECH）或 `/doh`（纯净转发），并可通过请求头或 URL 参数传递自定义 IP。
 
 ---
+## 📡 API 示例
 
+### JSON API
+
+```bash
+# 基础查询
+curl "https://your-domain.pages.dev/api/query?domain=twitter.com&type=A"
+
+# 携带参数
+curl "https://your-domain.pages.dev/api/query?domain=twitter.com&type=A&ip4=1.2.3.4&cf=backup.com"
+```
+
+**返回示例：**
+
+```json
+{
+  "domain": "twitter.com",
+  "type": "A",
+  "answers": ["104.18.10.118"],
+  "ech": null
+}
+```
+
+### DoH GET 请求
+
+```bash
+# 基础查询
+curl "https://your-domain.pages.dev/ech?dns=AAABAAABAAAAAAAAA3d3dwdleGFtcGxlA2NvbQAAAQAB"
+
+# 携带参数
+curl "https://your-domain.pages.dev/ech?dns=AAABAAAB...&ip4=1.2.3.4&cf=example.com"
+```
+
+### DoH POST 请求
+
+```bash
+# 通过请求头传参
+curl -X POST "https://your-domain.pages.dev/ech" \
+  --data-binary @dns-query.bin \
+  -H "Content-Type: application/dns-message" \
+  -H "X-Ip4: 1.2.3.4,5.6.7.8" \
+  -H "X-MetaIp4: 157.240.1.1" \
+  -H "X-CF: example.com,example2.com"
+
+# 通过 URL 参数传参
+curl -X POST "https://your-domain.pages.dev/ech?ip4=1.2.3.4" \
+  --data-binary @dns-query.bin \
+  -H "Content-Type: application/dns-message"
+```
+
+### 特殊查询
+
+```bash
+# 获取 Cloudflare ECH
+curl "https://your-domain.pages.dev/api/query?domain=cf.ech&type=HTTPS"
+
+# 获取 Meta ECH
+curl "https://your-domain.pages.dev/api/query?domain=fb.ech&type=HTTPS"
+```
+
+## 📝 多 IP 格式
+
+- 逗号分隔：`ip4=1.2.3.4,5.6.7.8`
+- JSON 数组（仅请求头）：`X-Ip4: ["1.2.3.4","5.6.7.8"]`
 ## 注意事项
 
 - **CIDR 列表**：如需自动识别 CF/Meta 站点并注入 ECH，请替换完整 CIDR；不替换则只依赖静态域名列表。
