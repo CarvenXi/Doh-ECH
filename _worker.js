@@ -149,8 +149,20 @@ async function handleDnsQuery(rawBuffer, config, ctx) {
 
         // 静态 CF/Meta 域名处理
         if (isStaticCF || isStaticMeta) {
-            if (qType === 28) return dnsResponse(createMultiAnsResponse(id, qName, 28, [], 3600));
-
+             if (qType === 28) {
+             // Meta 域名支持自定义 IPv6
+               if (isStaticMeta && config.metaIp6) {
+                  const ipStrings = parseIpList(config.metaIp6);
+                  if (ipStrings.length > 0) {
+                     return dnsResponse(createMultiAnsResponse(id, qName, 28, ipStrings.map(ipv6ToBytes), 300));
+                  }
+               }
+            // CF 域名仍屏蔽 IPv6
+              if (isStaticCF) {
+                 return dnsResponse(createMultiAnsResponse(id, qName, 28, [], 3600));
+              }
+              return forwardQuery(rawBuffer);
+            }
             if (qType === 65) {
                 if (isStaticCF) {
                     const echRdata = await fetchCleanEchRdata(config.echDomain, ctx);
@@ -317,7 +329,13 @@ async function resolveDNS(domain, type, config) {
     const isStaticMeta = META_DOMAINS.some(d => domain === d || domain.endsWith("." + d));
 
     if (isStaticCF || isStaticMeta) {
-        if (type === 'AAAA') return { domain, type, answers: [], ech: null };
+        if (type === 'AAAA') {
+            // Meta 域名支持自定义 IPv6
+            if (isStaticMeta && config.metaIp6) {
+                return { domain, type, answers: parseIpList(config.metaIp6), ech: null };
+            }
+            return { domain, type, answers: [], ech: null };
+        }
         if (type === 'HTTPS') {
             const ech = isStaticCF
                 ? await fetchRealEch(config.echDomain || 'cloudflare-ech.com')
