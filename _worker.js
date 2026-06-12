@@ -18,6 +18,10 @@ const CF_STATIC_DOMAINS = [
     "twimg.com", "twitter.com", "x.com", "t.co",
     "cloudflare-dns.com", "pages.dev", "workers.dev", "cloudflare.com"
 ];
+// 仅 IPv4 的域名（不返回 AAAA 记录）
+const IPV4_ONLY_DOMAINS = [
+    "twitter.com", "x.com", "t.co", "twimg.com"
+];
 const DEFAULT_CF_IP = "104.18.10.118";   // Cloudflare 默认优选 IP
 const DEFAULT_CF_IP6 = "2606:4700::6812:a76"; 
 // ========== 静态 Meta 域名 ==========
@@ -150,6 +154,10 @@ async function handleDnsQuery(rawBuffer, config, ctx) {
         // 静态 CF/Meta 域名处理
         if (isStaticCF || isStaticMeta) {
             if (qType === 28) {
+                const isIpv4Only = IPV4_ONLY_DOMAINS.some(d => qName === d || qName.endsWith("." + d));
+                if (isIpv4Only) {
+                    return dnsResponse(createMultiAnsResponse(id, qName, 28, [], 3600));
+                } 
                 // Meta 域名：优先 metaIp6，否则返回空
                 if (isStaticMeta) {
                     if (config.metaIp6) {
@@ -345,6 +353,10 @@ async function resolveDNS(domain, type, config) {
 
     if (isStaticCF || isStaticMeta) {
         if (type === 'AAAA') {
+            const isIpv4Only = IPV4_ONLY_DOMAINS.some(d => domain === d || domain.endsWith("." + d));
+            if (isIpv4Only) {
+                return { domain, type, answers: [], ech: null };
+            }
             // Meta 域名：优先 metaIp6，否则返回空
             if (isStaticMeta) {
                 return { 
