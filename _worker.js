@@ -149,19 +149,34 @@ async function handleDnsQuery(rawBuffer, config, ctx) {
 
         // 静态 CF/Meta 域名处理
         if (isStaticCF || isStaticMeta) {
-             if (qType === 28) {
-             // Meta 域名支持自定义 IPv6
-               if (isStaticMeta && config.metaIp6) {
-                  const ipStrings = parseIpList(config.metaIp6);
-                  if (ipStrings.length > 0) {
-                     return dnsResponse(createMultiAnsResponse(id, qName, 28, ipStrings.map(ipv6ToBytes), 300));
-                  }
-               }
-            // CF 域名仍屏蔽 IPv6
-              if (isStaticCF) {
-                 return dnsResponse(createMultiAnsResponse(id, qName, 28, [], 3600));
-              }
-              return forwardQuery(rawBuffer);
+            if (qType === 28) {
+                // Meta 域名：优先 metaIp6，否则返回空
+                if (isStaticMeta) {
+                    if (config.metaIp6) {
+                        const ipStrings = parseIpList(config.metaIp6);
+                        if (ipStrings.length > 0) {
+                            return dnsResponse(createMultiAnsResponse(id, qName, 28, ipStrings.map(ipv6ToBytes), 300));
+                        }
+                    }
+                    return dnsResponse(createMultiAnsResponse(id, qName, 28, [], 3600));
+                }    
+                // CF 域名：优先 ip6，其次 cfDomain(28)，最后默认 IPv6
+                if (isStaticCF) {
+                    let ipStrings = [];        
+                    if (config.ip6) {
+                        ipStrings = parseIpList(config.ip6);
+                    } else if (config.cfDomain) {
+                        const ips = await resolveMultiDomainToIps(config.cfDomain, 28);
+                        if (ips.length > 0) ipStrings = ips.map(bytesToIp6);
+                    } else {
+                        ipStrings = parseIpList(DEFAULT_CF_IP6);
+                    }        
+                    if (ipStrings.length > 0) {
+                        return dnsResponse(createMultiAnsResponse(id, qName, 28, ipStrings.map(ipv6ToBytes), 300));
+                    }
+                    return dnsResponse(createMultiAnsResponse(id, qName, 28, [], 3600));
+                }    
+                return forwardQuery(rawBuffer);
             }
             if (qType === 65) {
                 if (isStaticCF) {
@@ -330,9 +345,26 @@ async function resolveDNS(domain, type, config) {
 
     if (isStaticCF || isStaticMeta) {
         if (type === 'AAAA') {
-            // Meta 域名支持自定义 IPv6
-            if (isStaticMeta && config.metaIp6) {
-                return { domain, type, answers: parseIpList(config.metaIp6), ech: null };
+            // Meta 域名：优先 metaIp6，否则返回空
+            if (isStaticMeta) {
+                return { 
+                    domain, type, 
+                    answers: config.metaIp6 ? parseIpList(config.metaIp6) : [], 
+                    ech: null 
+                };
+            }
+            // CF 域名：优先 ip6，其次 cfDomain(28)，最后默认 IPv6
+            if (isStaticCF) {
+                let ipList = [];
+                if (config.ip6) {
+                    ipList = parseIpList(config.ip6);
+                } else if (config.cfDomain) {
+                    const resolved = await resolveMultiDomainToIps(config.cfDomain, 28);
+                    if (resolved.length > 0) ipList = resolved.map(ip => formatIPv6FromBytes(ip));
+                } else {
+                    ipList = parseIpList(DEFAULT_CF_IP6);
+                }
+                return { domain, type, answers: ipList, ech: null };
             }
             return { domain, type, answers: [], ech: null };
         }
@@ -783,7 +815,10 @@ function compileCidrs(cidrList) {
     }
     return { v4, v6 };
 }
-
+// IPv6 字节数组转字符串
+function bytesToIp6(bytes) {
+    return formatIPv6(bytes);
+}
 function isIpInCidrs(ip, compiled) {
     if (ip.includes(':')) {
         try {
