@@ -1099,7 +1099,7 @@ function getHtml() {
             border: 1px solid var(--border);
             border-radius: 10px;
             color: var(--text);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             transition: border-color 0.2s, box-shadow 0.2s;
             font-family: inherit;
         }
