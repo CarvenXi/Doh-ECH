@@ -782,7 +782,8 @@ function encodeSvcParam(key, value) {
     const id = ids[key];
     if (!id) return null;
     let valBuf;
-    if (key === 'alpn' || key === 'ipv4hint' || key === 'ipv6hint') {
+    
+    if (key === 'alpn') {
         const parts = value.split(',');
         valBuf = new Uint8Array(parts.reduce((a, b) => a + b.length + 1, 0));
         let o = 0;
@@ -790,11 +791,32 @@ function encodeSvcParam(key, value) {
             valBuf[o++] = p.length;
             for (let i = 0; i < p.length; i++) valBuf[o++] = p.charCodeAt(i);
         }
+    } else if (key === 'ipv4hint') {
+        // IPv4 hints: 每 4 字节一个 IP，直接拼接
+        const ips = value.split(',').map(s => s.trim()).filter(s => s);
+        valBuf = new Uint8Array(ips.length * 4);
+        let offset = 0;
+        for (const ip of ips) {
+            const bytes = ipToBytes(ip);
+            valBuf.set(bytes, offset);
+            offset += 4;
+        }
+    } else if (key === 'ipv6hint') {
+        // IPv6 hints: 每 16 字节一个 IP，直接拼接
+        const ips = value.split(',').map(s => s.trim()).filter(s => s);
+        valBuf = new Uint8Array(ips.length * 16);
+        let offset = 0;
+        for (const ip of ips) {
+            const bytes = ipv6ToBytes(ip);
+            valBuf.set(bytes, offset);
+            offset += 16;
+        }
     } else {
         const s = atob(value.replace(/-/g, '+').replace(/_/g, '/'));
         valBuf = new Uint8Array(s.length);
         for (let i = 0; i < s.length; i++) valBuf[i] = s.charCodeAt(i);
     }
+    
     const res = new Uint8Array(4 + valBuf.length);
     const v = new DataView(res.buffer);
     v.setUint16(0, id);
