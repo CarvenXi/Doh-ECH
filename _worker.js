@@ -316,19 +316,20 @@ async function resolveDNS(domain, type, config) {
         ipv6Hints = [...new Set(ipv6Hints)].slice(0, 6);
     }
 
-    // 用户自定义 IP 替换（受 best 控制）
-    const allowReplace = isStatic || best;
-    if (type === 'A' && config.ip4 && allowReplace) {
-        answers = parseIpList(config.ip4);
-    } else if (type === 'AAAA' && config.ip6 && allowReplace && !isDomainIpv4Only(domain)) {
-        answers = parseIpList(config.ip6);
-    } else if (owner === 'CF' && config.cfDomain && allowReplace) {
-        const resolved = await resolveMultiDomainToIps(config.cfDomain, dnsType);
-        if (resolved.length > 0) answers = resolved.map(ip => dnsType === 1 ? bytesToIp(ip) : formatIPv6FromBytes(ip));
-    } else if (owner === 'META') {
-        if (type === 'A' && config.metaIp4 && allowReplace) answers = parseIpList(config.metaIp4);
-        else if (type === 'AAAA' && config.metaIp6 && allowReplace) answers = parseIpList(config.metaIp6);
-    }
+// 用户自定义 IP 替换（受 best 控制，且仅对 A/AAAA 生效）
+const allowReplace = isStatic || best;
+if (type === 'A' && config.ip4 && allowReplace) {
+    answers = parseIpList(config.ip4);
+} else if (type === 'AAAA' && config.ip6 && allowReplace && !isDomainIpv4Only(domain)) {
+    answers = parseIpList(config.ip6);
+} else if ((type === 'A' || type === 'AAAA') && owner === 'CF' && config.cfDomain && allowReplace) {
+    const targetType = type === 'A' ? 1 : 28;
+    const resolved = await resolveMultiDomainToIps(config.cfDomain, targetType);
+    if (resolved.length > 0) answers = resolved.map(ip => type === 'A' ? bytesToIp(ip) : formatIPv6FromBytes(ip));
+} else if ((type === 'A' || type === 'AAAA') && owner === 'META') {
+    if (type === 'A' && config.metaIp4 && allowReplace) answers = parseIpList(config.metaIp4);
+    else if (type === 'AAAA' && config.metaIp6 && allowReplace) answers = parseIpList(config.metaIp6);
+}
 
     const result = { domain, type, answers: answers || [] };
     result.ech = ech || null;
