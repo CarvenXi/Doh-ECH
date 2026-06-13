@@ -383,16 +383,16 @@ async function resolveDNS(domain, type, config) {
                         if (resolved.length > 0) ipv6Hints = resolved.map(formatIPv6FromBytes);
                     } else ipv6Hints = parseIpList(DEFAULT_CF_IP6);
                 }
-                ipv4Hints = [...new Set(ipv4Hints)].slice(0, 4);
-                ipv6Hints = [...new Set(ipv6Hints)].slice(0, 4);
+                ipv4Hints = [...new Set(ipv4Hints)].slice(0, 8);
+                ipv6Hints = [...new Set(ipv6Hints)].slice(0, 8);
                 ech = await fetchRealEch(config.echDomain || 'cloudflare-ech.com');
             } else {
                 if (config.metaIp4) ipv4Hints = parseIpList(config.metaIp4);
                 else ipv4Hints = [DEFAULT_META_IP];
                 
                 if (config.metaIp6) ipv6Hints = parseIpList(config.metaIp6);
-                ipv4Hints = [...new Set(ipv4Hints)].slice(0, 4);
-                ipv6Hints = [...new Set(ipv6Hints)].slice(0, 4);
+                ipv4Hints = [...new Set(ipv4Hints)].slice(0, 8);
+                ipv6Hints = [...new Set(ipv6Hints)].slice(0, 8);
                 ech = META_ECH_CONFIG;
             }
             
@@ -446,13 +446,13 @@ async function resolveDNS(domain, type, config) {
                 queryUpstreamDNS(domain, 28)
             ]);
             if (aData && aData.Answer) {
-                ipv4Hints = aData.Answer.filter(r => r.type === 1).map(r => r.data).slice(0,4);
+                ipv4Hints = aData.Answer.filter(r => r.type === 1).map(r => r.data).slice(0,8);
             }
             if (aaaaData && aaaaData.Answer) {
-                ipv6Hints = aaaaData.Answer.filter(r => r.type === 28).map(r => r.data).slice(0,4);
+                ipv6Hints = aaaaData.Answer.filter(r => r.type === 28).map(r => r.data).slice(0,8);
             }
         } else {
-            answers = data.Answer.filter(r => r.type === dnsType).map(r => r.data).slice(0,4);
+            answers = data.Answer.filter(r => r.type === dnsType).map(r => r.data).slice(0,8);
         }
     }
 
@@ -619,11 +619,11 @@ function parseHttpsRecord(dataStr) {
 // ========== 带 Hints 的 HTTPS 记录打包 ==========
 function packHttpsParamsWithHints(priority, target, params, ipv4Hints, ipv6Hints) {
     if (ipv4Hints && ipv4Hints.length > 0) {
-        const unique = [...new Set(ipv4Hints)].slice(0,4);
+        const unique = [...new Set(ipv4Hints)].slice(0,8);
         params.push({ key: 'ipv4hint', val: unique.join(',') });
     }
     if (ipv6Hints && ipv6Hints.length > 0) {
-        const unique = [...new Set(ipv6Hints)].slice(0,4);
+        const unique = [...new Set(ipv6Hints)].slice(0,8);
         params.push({ key: 'ipv6hint', val: unique.join(',') });
     }
     return packHttpsParams(priority, target, params);
@@ -651,8 +651,8 @@ async function fetchCleanEchRdataWithHints(config, domain, ctx) {
             ipv6Hints = parseIpList(DEFAULT_CF_IP6);
         }
     }
-    ipv4Hints = [...new Set(ipv4Hints)].slice(0, 4);
-    ipv6Hints = [...new Set(ipv6Hints)].slice(0, 4);
+    ipv4Hints = [...new Set(ipv4Hints)].slice(0, 8);
+    ipv6Hints = [...new Set(ipv6Hints)].slice(0, 8);
     const realEch = await fetchRealEch(config.echDomain || 'cloudflare-ech.com');
     if (!realEch) return null;
     
@@ -674,8 +674,8 @@ async function packMetaEchWithHints(domain, config) {
     if (config.metaIp6) {
         ipv6Hints = parseIpList(config.metaIp6);
     }
-    ipv4Hints = [...new Set(ipv4Hints)].slice(0, 4);
-    ipv6Hints = [...new Set(ipv6Hints)].slice(0, 4);
+    ipv4Hints = [...new Set(ipv4Hints)].slice(0, 8);
+    ipv6Hints = [...new Set(ipv6Hints)].slice(0, 8);
     return packHttpsParamsWithHints(1, ".", [
         { key: 'alpn', val: 'h2,h3' },
         { key: 'ech', val: META_ECH_CONFIG }
