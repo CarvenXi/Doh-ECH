@@ -71,15 +71,12 @@
 
 ### 3. 使用方法
 - **网页查询**：直接访问首页（`/`），输入域名、选择类型，可展开高级选项填入自定义参数后查询。
-- **JSON API**：  
+- **DOH地址示例**：  
   ```
-  GET /api/query?domain=example.com&type=A&cf=bestcf.com,backup.com
+   "https://your-domain.pages.dev/ech?cf=ip.sb&ip4=1.2.3.4,5.6.7.8&ip6=::&MetaIp4=5.6.7.8"
   ```
 - **配置 DoH 客户端**：  
   将 DoH 地址设置为 `https://你的域名/ech`（注入 ECH）或 `/doh`（纯净转发），并可通过请求头或 URL 参数传递自定义 IP。
-####  doh地址
-```bash
- "https://your-domain.pages.dev/ech?cf=ip.sb&ip4=1.2.3.4,5.6.7.8&ip6=::&MetaIp4=5.6.7.8"
 ---
 
 ## 📡 API 示例
