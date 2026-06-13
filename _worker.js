@@ -454,18 +454,21 @@ async function resolveDNS(domain, type, config) {
     let ipv4Hints = [];
     let ipv6Hints = [];
     if (type === 'HTTPS' && (owner === 'CF' || owner === 'META')) {
-        const [aData, aaaaData] = await Promise.all([
-            queryUpstreamDNS(domain, 1),
-            queryUpstreamDNS(domain, 28)
-        ]);
-        if (aData && aData.Answer) {
-            ipv4Hints = aData.Answer.filter(r => r.type === 1).map(r => r.data);
-        }
-        if (aaaaData && aaaaData.Answer) {
-            ipv6Hints = aaaaData.Answer.filter(r => r.type === 28).map(r => r.data);
-        }
-        ipv4Hints = [...new Set(ipv4Hints)].slice(0, 6);
-        ipv6Hints = [...new Set(ipv6Hints)].slice(0, 3);
+    // 分别查询，避免 AAAA 失败影响 IPv4
+    const [aResult, aaaaResult] = await Promise.allSettled([
+        queryUpstreamDNS(domain, 1),
+        queryUpstreamDNS(domain, 28)
+    ]);
+
+    if (aResult.status === 'fulfilled' && aResult.value?.Answer) {
+        ipv4Hints = aResult.value.Answer.filter(r => r.type === 1).map(r => r.data);
+    }
+    if (aaaaResult.status === 'fulfilled' && aaaaResult.value?.Answer) {
+        ipv6Hints = aaaaResult.value.Answer.filter(r => r.type === 28).map(r => r.data);
+    }
+
+    ipv4Hints = [...new Set(ipv4Hints)].slice(0, 6);
+    ipv6Hints = [...new Set(ipv6Hints)].slice(0, 3);
     }
     // 自定义 IP 替换
     if (type === 'A' && config.ip4) {
