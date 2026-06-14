@@ -210,15 +210,12 @@ async function resolveDNS(domain, type, config) {
     domain = domain.toLowerCase().replace(/\.$/, '');
     const best = config.best === 'true';
 
-    // 原始静态域名标志
     const origStaticCF = CF_STATIC_DOMAINS.some(d => domain === d || domain.endsWith("." + d));
     const origStaticMeta = META_DOMAINS.some(d => domain === d || domain.endsWith("." + d));
 
-    // 有效的静态标志（跟随优选时可能将 CIDR 确认的域名视为静态）
     let effectiveCF = origStaticCF;
     let effectiveMeta = origStaticMeta;
 
-    // 如果 best=true 且不在原始静态列表中，尝试 CIDR 探测
     if (!origStaticCF && !origStaticMeta && best) {
         const probe = await activeProbeOwner(domain, null);
         if (probe) {
@@ -234,7 +231,7 @@ async function resolveDNS(domain, type, config) {
     let ipv4Hints = [];
     let ipv6Hints = [];
 
-    // ===== 静态域名处理（使用 effectiveCF / effectiveMeta） =====
+    // ===== 静态域名处理（含 best 提升的） =====
     if (isStatic) {
         if (type === 'AAAA') {
             if (isDomainIpv4Only(domain)) return { domain, type, answers: [], ech: null };
@@ -293,7 +290,7 @@ async function resolveDNS(domain, type, config) {
         return { domain, type, answers: ipList, ech: null };
     }
 
-    // ===== 非静态域名 =====
+    // ===== 非静态域名（绝不替换） =====
     const dnsType = type === 'HTTPS' ? 65 : (type === 'AAAA' ? 28 : 1);
     const upstreamData = await queryUpstreamDNS(domain, dnsType);
     if (!upstreamData) return { domain, type, error: '上游查询失败' };
@@ -310,7 +307,6 @@ async function resolveDNS(domain, type, config) {
         }
     }
 
-    // 归属探测（用于补充 ECH 和 hints）
     const probe = await activeProbeOwner(domain, null);
     const owner = probe ? probe.owner : null;
 
@@ -319,7 +315,6 @@ async function resolveDNS(domain, type, config) {
         else if (owner === 'CF') ech = await fetchRealEch(config.echDomain || 'cloudflare-ech.com');
     }
 
-    // 收集 hints（归属明确时）
     if (type === 'HTTPS' && (owner === 'CF' || owner === 'META')) {
         const [aData, aaaaData] = await Promise.all([
             queryUpstreamDNS(domain, 1).catch(() => null),
@@ -333,22 +328,6 @@ async function resolveDNS(domain, type, config) {
         }
         ipv4Hints = [...new Set(ipv4Hints)].slice(0, 6);
         ipv6Hints = [...new Set(ipv6Hints)].slice(0, 6);
-    }
-
-    // 用户自定义 IP 替换（仅对 A/AAAA，且受 best 控制，但非静态域名只有 best=true 时才可能走到这里，因为上面静态分支已拦截）
-    // 这里保留兼容性，其实非静态且 best=false 时不会替换
-    const allowReplace = best; // 此时 isStatic 为 false，所以只有 best 能控制
-    if (type === 'A' && config.ip4 && allowReplace) {
-        answers = parseIpList(config.ip4);
-    } else if (type === 'AAAA' && config.ip6 && allowReplace && !isDomainIpv4Only(domain)) {
-        answers = parseIpList(config.ip6);
-    } else if ((type === 'A' || type === 'AAAA') && config.cfDomain && allowReplace && (owner === 'CF' || best)) {
-        const targetType = type === 'A' ? 1 : 28;
-        const resolved = await resolveMultiDomainToIps(config.cfDomain, targetType);
-        if (resolved.length > 0) answers = resolved.map(ip => type === 'A' ? bytesToIp(ip) : formatIPv6FromBytes(ip));
-    } else if ((type === 'A' || type === 'AAAA') && owner === 'META') {
-        if (type === 'A' && config.metaIp4 && allowReplace) answers = parseIpList(config.metaIp4);
-        else if (type === 'AAAA' && config.metaIp6 && allowReplace) answers = parseIpList(config.metaIp6);
     }
 
     const result = { domain, type, answers: answers || [] };
