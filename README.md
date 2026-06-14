@@ -20,11 +20,12 @@
 - **网页查询**：直接访问首页（`/`），输入域名、选择类型，可展开高级选项填入自定义参数后查询。
 - **DOH地址示例**：  
   ```
-   "https://your-domain.pages.dev/ech?cf=ip.sb&ip4=1.2.3.4,5.6.7.8&ip6=::&MetaIp4=5.6.7.8"
+   "https://your-domain.pages.dev/ech?best=true&cf=ip.sb&ip4=1.2.3.4,5.6.7.8&ip6=::&MetaIp4=5.6.7.8"
   ```
 - **配置 DoH 客户端**：  
-  1.将支持ECH的浏览器如Chrome/Firefox 的安全DNS设置为 DoH 地址设置：`https://你的域名/ech`，并可通过请求头或 URL 参数传递自定义 IP。
-  2.使用代理工具：将需要直连的CF站点的域名解析服务器doh设置为`https://你的域名/ech`，并可通过请求头或 URL 参数传递自定义 IP。
+  -- 将支持ECH的浏览器如Chrome/Firefox 的安全DNS设置为 DoH 地址设置：`https://你的域名/ech`，并可通过请求头或 URL 参数传递自定义 IP。
+  
+  -- 使用代理工具：将需要直连的CF站点的域名解析服务器doh设置为`https://你的域名/ech`，并可通过请求头或 URL 参数传递自定义 IP。
   
 ---
 ## 特性
@@ -59,8 +60,7 @@
 | `/`           | 前端查询页面，提供域名输入、类型选择与高级选项。                      |
 | `/api/query`  | JSON API，通过 URL 参数查询并返回结构化结果（支持所有自定义参数）。    |
 | `/ech`        | DoH 端点，返回注入 ECH 配置的 DNS 响应（支持参数与请求头）。          |
-| `/doh`        | DoH 端点，纯净上游转发，不注入 ECH。                                  |
-
+| `/doh`        | DoH 端点，纯净上游转发，不注入 ECH。  |
 ---
 
 ## 自定义参数
@@ -75,6 +75,7 @@
 | `metaIp6`     | Meta 域名的 IPv6 替换地址                                                                 | `2a03:2880:...`                     |
 | `cf`          | 解析优选域名（支持逗号分隔多域名）以获取替换 IP，**仅对 Cloudflare 相关域名生效**        | `example.com,ip2.example.com`       |
 | `ech`         | 获取CF公共ECH配置的域名（默认 `cloudflare-ech.com`）                                      | `cloudflare-ech.com`               |
+| `best` | `X-Best` | 全局跟随优选（`true`/`false`） | `true` |
 
 > **注意**：`cf` 参数仅当目标域名为 Cloudflare 站点（静态列表匹配或 CIDR 探测）时才会生效，避免误替换非 CF 域名。
 
