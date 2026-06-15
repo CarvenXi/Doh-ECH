@@ -51,8 +51,8 @@ function getCompiledCF()   { if (!compiledCF)   compiledCF   = compileCidrs(RAW_
 export default {
     async fetch(req, env, ctx) {
         const url = new URL(req.url);
-        const clientIP = url.searchParams.get('clientIp')
-            || req.headers.get('X-Client-IP')
+        const clientIP = url.searchParams.get('clientip')
+            || req.headers.get('X-ClientIP')
             || req.headers.get('CF-Connecting-IP')
             || '';
         if (url.pathname === '/api/query') return handleApiQuery(url, clientIP);
