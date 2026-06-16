@@ -1,6 +1,6 @@
 # DOH-ECH – CF Pages 实现优选自定义并直连CF/Meta 站点
 
- **DNS-over-HTTPS (DoH) 服务器**，智能为 Cloudflare / Meta 站点注入 ECH 配置，实现隐藏SNI，支持自定义优选IP、多优选域名优选解析，同时自动获取ecs，切换网络时可无感返回对应运营商的最佳ip，支持全球边缘缓存,实现CF/META 站点返回携带ech配置的记录，通过优选后亦直连CF托管网站/Meta 站点 如X，Facebook等 。
+ **DNS-over-HTTPS (DoH) 服务器**，智能为 Cloudflare / Meta 站点注入 ECH 配置，实现隐藏SNI，支持自定义优选IP、多优选域名解析，同时自动获取ecs，切换网络时可无感返回对应运营商的最佳ip，支持全球边缘缓存,实现CF/META 站点返回携带ech配置的记录，其他站点使用Google和Aliyun DOH竞速查询结果转发返回记录，通过优选后亦可直连CF托管网站/Meta 站点 如X，Facebook等 。
 
 ---
 
