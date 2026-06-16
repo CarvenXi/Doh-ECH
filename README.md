@@ -1,17 +1,15 @@
-# DOH-ECH – CF Pages 实现优选自定义并直连CF/Meta 站点
+# DOH-ECH ： CF-Pages 实现 
 
- **DNS-over-HTTPS (DoH) 服务器**，智能为 Cloudflare / Meta 站点注入 ECH 配置，实现隐藏SNI，支持自定义优选IP、多优选域名解析，同时自动获取ecs，切换网络时可无感返回对应运营商的最佳ip，支持全球边缘缓存,实现CF/META 站点返回携带ech配置的记录，其他站点使用Google和Aliyun DOH竞速查询结果转发返回记录，通过优选后亦可直连CF托管网站/Meta 站点 如X，Facebook等 。
+ **个人 DNS-over-HTTPS (DoH) 服务器**，智能为 Cloudflare / Meta 站点注入 ECH 配置，实现隐藏SNI，支持自定义优选IP、多优选域名解析，同时自动获取ecs，切换网络时可无感返回对应运营商的最佳ip，支持全球边缘缓存,实现CF/META 站点返回携带ech配置的记录，其他站点使用Google和Aliyun DOH竞速查询结果转发返回记录，通过优选后亦可直连CF托管网站/Meta 站点 如X，Facebook等 。
 
 ---
 
 ## 部署步骤
 
-**Cloudflare IPv4 官方列表**：[https://www.cloudflare.com/ips-v4](https://www.cloudflare.com/ips-v4)
-
 ### 1. 部署到 Cloudflare Pages
 - 进入 [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages** → **Pages** → **创建项目**。
 - 上传资产或连接 Git 仓库，上传 `_worker.js` 至项目根目录。
-- 部署完成后访问分配的域名即可。
+- 部署完成后，访问分配的域名/绑定的自定义域名 即可。
 
 ### 2. 使用方法
 - **网页查询**：直接访问首页（`/`），输入域名、选择类型，可展开高级选项填入自定义参数后查询。
@@ -138,17 +136,17 @@ curl "https://your-domain.pages.dev/api/query?domain=fb.ech&type=HTTPS"
 - ✅ **固定域名优选**  
   内置 Cloudflare / Meta 自定义固定域名列表，直接返回预设的优选 IP（可自定义覆盖）。
 - ✅ **自定义 IP 替换**  
-  通过 `ip4`、`ip6`、`metaIp4`、`metaIp6` 参数强制替换解析结果，支持逗号分隔或 JSON 数组。
-- ✅ **cf 优选多域名解析**  
-  `cf` 参数支持逗号分隔的多个域名，并发解析并合并去重 IP，适用于多 CDN 负载均衡。
+  通过 `ip4`、`ip6`、`metaIp4`、`metaIp6` 等参数强制替换解析结果，支持逗号分隔或 JSON 数组。
+- ✅ **优选多域名解析**  
+  `cf`,`meta` 参数支持逗号分隔的多个域名，并发解析并合并去重 IP，适用于多 CDN 负载均衡。
 - ✅ **双上游竞速**  
   同时查询 Google DNS 和阿里云 DNS，取最快响应，提高解析速度。
 - ✅ **全球边缘缓存**  
   利用 Cloudflare Cache API 缓存上游 DNS 结果（A/AAAA 300s，HTTPS 600s），大幅减少上游请求次数。
 - ✅ **CIDR 归属探测**  
   自动识别未知域名的 Cloudflare / Meta 归属，并注入对应 ECH（需配置 CIDR 列表）。
-- ✅ **美观的前端查询页面**  
-  内嵌网页界面，支持手动输入域名、选择记录类型、高级参数设置，即时显示 JSON 结果。
+- ✅ **ECS就近解析**  
+  默认自动获取发起doh查询的用户端ClientIP（支持自定义 clientip=x.x.x.x）,实现就近解析，同时在频繁切换网络环境时仍能保证最佳解析结果。
 
 ---
 ## 项目结构
@@ -157,22 +155,11 @@ curl "https://your-domain.pages.dev/api/query?domain=fb.ech&type=HTTPS"
 /
 └── _worker.js           # 单文件，包含前端页面、API、DoH 全部逻辑
 ```
-
 ---
 
-## 技术栈
+## 警告
 
-- Cloudflare Pages（边缘函数运行时）
-- 标准 DNS 二进制报文构造与解析
-- Google DNS / 阿里云 DNS JSON API
-- Cloudflare Cache API（边缘缓存）
-- Promise.any 双上游竞速
-
----
-
-## 协议
-
-本项目由AI生成，仅供娱乐目的，请遵守当地法律法规合理使用
+本项目由AI生成，仅供娱乐目的，不得用于非法用途，请遵守当地法律法规合理学习和使用，用于非不符合当地法律法规的非法用途造成的后果与本人本项目无关！
 
 ---
 
