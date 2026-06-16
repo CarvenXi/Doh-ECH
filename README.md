@@ -1,6 +1,6 @@
-# DOH-ECH – Cloudflare Pages 实现 DoH with ECH 直连CF托管站点
+# DOH-ECH – CF Pages 实现优选自定义并直连CF/Meta 站点
 
-基于 Cloudflare Pages 的单文件 **DNS-over-HTTPS (DoH) 服务器**，智能为 Cloudflare / Meta 站点注入 ECH 配置，实现隐藏SNI，并支持自定义优选 IP、多域名解析与全球边缘缓存,实现通过优选ip后，直连CF托管网站/Meta 站点 如X，Facebook等 。
+ **DNS-over-HTTPS (DoH) 服务器**，智能为 Cloudflare / Meta 站点注入 ECH 配置，实现隐藏SNI，支持自定义优选IP、多优选域名优选解析，同时自动获取ecs，切换网络时可无感返回对应运营商的最佳ip，支持全球边缘缓存,实现CF/META 站点返回携带ech配置的记录，通过优选后亦直连CF托管网站/Meta 站点 如X，Facebook等 。
 
 ---
 
@@ -11,14 +11,13 @@
 ### 1. 部署到 Cloudflare Pages
 - 进入 [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages** → **Pages** → **创建项目**。
 - 上传资产或连接 Git 仓库，上传 `_worker.js` 至项目根目录。
-- 无需设置构建命令或输出目录（Pages 会自动识别单文件 Worker）。
 - 部署完成后访问分配的域名即可。
 
 ### 2. 使用方法
 - **网页查询**：直接访问首页（`/`），输入域名、选择类型，可展开高级选项填入自定义参数后查询。
 - **DOH地址(完整参数示例)**：  
   ```
-   "https://your-domain.pages.dev/ech?best=true&clientip=1.2.4.8&cf=ip.sb&ip4=1.2.3.4,5.6.7.8&ip6=::&meta=fbcdn.net&MetaIp4=5.6.7.8&MetaIp6=::"
+   "https://your-domain.pages.dev/ech?best=true&clientip=1.2.4.8&cf=ip.sb&ip4=1.2.3.4,5.6.7.8&ip6=::&meta=fbcdn.net&metaIp4=5.6.7.8&metaIp6=::"
   ```
 - **配置 DoH 客户端**：  
   -- 将支持ECH的浏览器如Chrome/Firefox 的安全DNS设置为 DoH 地址设置：`https://你的域名/ech`，并可通过请求头或 URL 参数传递自定义 IP。
