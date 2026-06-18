@@ -9,7 +9,7 @@
 
 // ===================== 全局配置 =====================
 //上游DOH列表
-const UPSTREAM_DNS_GOOGLE = 'https://dns.nextdns.io/67e2ed';
+const UPSTREAM_DNS_GOOGLE = 'https://dns.google/dns-query';
 const UPSTREAM_DNS_ALI = 'https://dns.alidns.com/dns-query';
 const UPSTREAM_JSON_GOOGLE = 'https://dns.google/resolve';
 const UPSTREAM_JSON_ALI = 'https://dns.alidns.com/resolve';
