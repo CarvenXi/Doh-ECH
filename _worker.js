@@ -1010,7 +1010,7 @@ function getHtml() {
         }
         .subtitle { 
             color: var(--text-secondary); 
-            font-size: 0.7rem; 
+            font-size: 0.75rem; 
             margin-bottom: 1.8rem;
             margin-left: 56px;
             position: relative;
@@ -1037,7 +1037,7 @@ function getHtml() {
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 14px;
             color: var(--text);
-            font-size: 0.95rem;
+            font-size: 0.75rem;
             transition: all 0.2s;
             font-family: inherit;
             outline: none;
@@ -1057,6 +1057,16 @@ function getHtml() {
             background-position: right 1rem center;
             padding-right: 2.5rem;
         }
+        .row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .row > div {
+            flex: 1;
+        }
         .param-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1064,7 +1074,8 @@ function getHtml() {
             position: relative;
             z-index: 1;
         }
-        @media (max-width: 500px) {
+        /* 移动端依然双列（仅在非常窄时切换） */
+        @media (max-width: 400px) {
             .param-grid {
                 grid-template-columns: 1fr;
             }
@@ -1085,11 +1096,10 @@ function getHtml() {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 1rem;
             position: relative;
             z-index: 1;
         }
-        /* 高光圆形勾选框 */
+        /* 高光圆形勾选框（绝对居中白点） */
         .checkbox-container {
             display: inline-flex;
             align-items: center;
@@ -1123,17 +1133,17 @@ function getHtml() {
         .checkmark::after {
             content: '';
             position: absolute;
-            top: 6px;
-            left: 6px;
+            top: 50%;
+            left: 50%;
             width: 12px;
             height: 12px;
             border-radius: 50%;
             background: white;
-            transform: scale(0);
+            transform: translate(-50%, -50%) scale(0);
             transition: transform 0.2s ease;
         }
         .checkbox-container input:checked + .checkmark::after {
-            transform: scale(1);
+            transform: translate(-50%, -50%) scale(1);
         }
         button {
             width: 100%;
@@ -1249,54 +1259,58 @@ function getHtml() {
         </div>
         <p class="subtitle">智能 DNS 解析 · ECH 注入 · ECS 就近解析</p>
         
-        <!-- 域名和类型 -->
-        <label for="domain">查询域名</label>
-        <input type="text" id="domain" placeholder="输入域名，例如 twitter.com" value="twitter.com" autofocus>
+        <!-- 域名和记录类型一行 -->
         <div class="row">
             <div>
+                <label for="domain">查询域名</label>
+                <input type="text" id="domain" placeholder="输入域名，例如 twitter.com" value="twitter.com" autofocus style="margin-bottom:0">
+            </div>
+            <div>
                 <label for="type">记录类型</label>
-                <select id="type">
+                <select id="type" style="margin-bottom:0">
                     <option value="A">A (IPv4)</option>
                     <option value="AAAA">AAAA (IPv6)</option>
                     <option value="HTTPS">HTTPS (ECH)</option>
                 </select>
             </div>
+        </div>
+
+        <!-- 优选模式和跟随优选一行 -->
+        <div class="row" style="align-items: flex-end;">
             <div>
                 <label for="mode">优选模式</label>
-                <select id="mode" onchange="onModeChange()">
+                <select id="mode" onchange="onModeChange()" style="margin-bottom:0">
                     <option value="">无 (默认解析)</option>
-                    <option value="cf">🔶 Cloudflare 优选</option>
+                    <option value="cf">🔶 CF 优选</option>
                     <option value="meta">🔵 Meta 优选</option>
                 </select>
             </div>
-        </div>
-
-        <!-- 全局优选勾选框 -->
-        <div class="toggle-row">
-            <label class="checkbox-container">
-                <input type="checkbox" id="best" onchange="updateBestLabel()">
-                <span class="checkmark"></span>
-                <span id="bestLabel">非静态域名跟随优选</span>
-            </label>
+            <div style="display:flex; align-items:center; padding-bottom:0.5rem;">
+                <label class="checkbox-container" style="margin-bottom:0;">
+                    <input type="checkbox" id="best" onchange="updateBestLabel()">
+                    <span class="checkmark"></span>
+                    <span id="bestLabel">非静态域名跟随优选</span>
+                </label>
+            </div>
         </div>
 
         <!-- Cloudflare 高级参数 -->
         <div id="cfParams" class="advanced-section">
             <div class="param-grid">
                 <div>
-                    <label>Cloudflare IPv4 <span class="badge badge-cf">ip4</span></label>
+                    <label>CF IPv4 <span class="badge badge-cf">ip4</span></label>
                     <input type="text" id="ip4" placeholder="1.2.3.4, 5.6.7.8">
                 </div>
                 <div>
-                    <label>Cloudflare IPv6 <span class="badge badge-cf">ip6</span></label>
+                    <label>CF IPv6 <span class="badge badge-cf">ip6</span></label>
                     <input type="text" id="ip6" placeholder="2606:4700::, 2606:4700::1">
                 </div>
                 <div>
-                    <label>解析域名获取 IP <span class="badge badge-cf">cf</span></label>
+                    <label>优选域名 <span class="badge badge-cf">cf</span></label>
                     <input type="text" id="cfDomain" placeholder="example.com, example2.com">
                 </div>
                 <div>
-                    <label>ECH 来源域名 <span class="badge badge-cf">ech</span></label>
+                    <label>outer-sni <span class="badge badge-cf">ech</span></label>
                     <input type="text" id="echDomain" placeholder="cloudflare-ech.com">
                 </div>
                 <div>
@@ -1329,7 +1343,7 @@ function getHtml() {
                     <input type="text" id="metaIp6" placeholder="2a03:2880:...">
                 </div>
                 <div>
-                    <label>解析域名获取 IP <span class="badge badge-meta">meta</span></label>
+                    <label>优选域名<span class="badge badge-meta">meta</span></label>
                     <input type="text" id="metaDomain" placeholder="meta-better.example.com">
                 </div>
             </div>
@@ -1384,7 +1398,6 @@ function getHtml() {
             params.set('domain', domain);
             params.set('type', type);
             
-            // 全局优选 (checkbox)
             const bestChecked = document.getElementById('best').checked;
             params.set('best', bestChecked ? 'true' : 'false');
 
@@ -1438,13 +1451,12 @@ function getHtml() {
             }
         }
 
-        // 初始化 best 标签
+        // 初始化标签
         updateBestLabel();
     </script>
 </body>
 </html>`;
 }
-
 function json(data, status = 200) {
     return new Response(JSON.stringify(data), {
         status,
