@@ -935,15 +935,16 @@ function getHtml() {
         :root {
             --glass-bg: rgba(255, 255, 255, 0.08);
             --glass-border: rgba(255, 255, 255, 0.12);
-            --glass-hover: rgba(255, 255, 255, 0.15);
             --highlight: rgba(255, 255, 255, 0.2);
             --text: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.7);
-            --accent: #0A84FF; /* iOS 蓝 */
+            --accent: #0A84FF;
             --accent-glow: rgba(10, 132, 255, 0.3);
             --cf: #FF9F0A;
             --meta: #0A84FF;
             --bg: #000000;
+            --card-bg: rgba(30, 30, 30, 0.6);
+            --input-bg: rgba(255, 255, 255, 0.06);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -955,38 +956,39 @@ function getHtml() {
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            background-image: radial-gradient(ellipse at top, rgba(10, 132, 255, 0.3) 0%, transparent 60%),
+            background-image: radial-gradient(ellipse at top, rgba(10, 132, 255, 0.25) 0%, transparent 60%),
                               radial-gradient(ellipse at bottom, rgba(255, 159, 10, 0.1) 0%, transparent 60%);
+            -webkit-tap-highlight-color: transparent;
         }
         .container {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            background: var(--card-bg);
+            backdrop-filter: blur(25px) saturate(140%);
+            -webkit-backdrop-filter: blur(25px) saturate(140%);
             border-radius: 32px;
-            padding: 2.5rem;
+            padding: 2rem;
             width: 100%;
-            max-width: 560px;
+            max-width: 680px;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.08);
             position: relative;
             overflow: hidden;
+            transition: all 0.2s ease;
         }
-        /* 高光效果 */
         .container::before {
             content: '';
             position: absolute;
             top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 50%);
+            left: -30%;
+            width: 160%;
+            height: 160%;
+            background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.12) 0%, transparent 50%);
             pointer-events: none;
         }
         .header {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             position: relative;
             z-index: 1;
         }
@@ -1008,8 +1010,8 @@ function getHtml() {
         }
         .subtitle { 
             color: var(--text-secondary); 
-            font-size: 0.8rem; 
-            margin-bottom: 2rem;
+            font-size: 0.7rem; 
+            margin-bottom: 1.8rem;
             margin-left: 56px;
             position: relative;
             z-index: 1;
@@ -1018,7 +1020,7 @@ function getHtml() {
             font-size: 0.8rem; 
             font-weight: 500;
             display: block; 
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -1027,15 +1029,15 @@ function getHtml() {
         }
         input, select {
             width: 100%;
-            padding: 0.8rem 1rem;
-            margin-bottom: 1.2rem;
-            background: rgba(255, 255, 255, 0.06);
+            padding: 0.7rem 1rem;
+            margin-bottom: 1rem;
+            background: var(--input-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 14px;
             color: var(--text);
-            font-size: 0.75rem;
+            font-size: 0.95rem;
             transition: all 0.2s;
             font-family: inherit;
             outline: none;
@@ -1055,12 +1057,83 @@ function getHtml() {
             background-position: right 1rem center;
             padding-right: 2.5rem;
         }
-        .row {
+        .param-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+            gap: 0 1.5rem;
             position: relative;
             z-index: 1;
+        }
+        @media (max-width: 500px) {
+            .param-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 6px;
+            background: rgba(255,255,255,0.15);
+            vertical-align: middle;
+        }
+        .badge-cf { color: var(--cf); }
+        .badge-meta { color: var(--meta); }
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        /* 高光圆形勾选框 */
+        .checkbox-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            z-index: 1;
+        }
+        .checkbox-container input {
+            display: none;
+        }
+        .checkmark {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            display: inline-block;
+            position: relative;
+            transition: all 0.2s;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: 0 0 8px rgba(255,255,255,0.1);
+        }
+        .checkbox-container input:checked + .checkmark {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 14px var(--accent-glow);
+        }
+        .checkmark::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: white;
+            transform: scale(0);
+            transition: transform 0.2s ease;
+        }
+        .checkbox-container input:checked + .checkmark::after {
+            transform: scale(1);
         }
         button {
             width: 100%;
@@ -1073,7 +1146,7 @@ function getHtml() {
             border-radius: 14px;
             cursor: pointer;
             transition: all 0.2s;
-            margin-top: 0.5rem;
+            margin-top: 1rem;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 4px 16px rgba(10, 132, 255, 0.4);
@@ -1093,9 +1166,7 @@ function getHtml() {
             box-shadow: none;
         }
         .result-box {
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 14px;
             padding: 1.2rem;
             margin-top: 1.2rem;
@@ -1128,23 +1199,10 @@ function getHtml() {
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .result-box.error { color: #FF453A; border-color: rgba(255,69,58,0.3); }
-        .badge {
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-right: 8px;
-            background: rgba(255,255,255,0.1);
-        }
-        .badge-cf { color: var(--cf); }
-        .badge-meta { color: var(--meta); }
         .advanced-section {
-            margin: 1.5rem 0;
+            margin: 1.2rem 0;
             padding: 1.2rem;
             background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             display: none;
@@ -1152,10 +1210,6 @@ function getHtml() {
             z-index: 1;
         }
         .advanced-section.show { display: block; }
-        .advanced-section .param-group { display: none; }
-        .advanced-section .param-group.active { display: block; }
-        .advanced-section input { margin-bottom: 0.8rem; }
-        .advanced-section input:last-child { margin-bottom: 0; }
         .footer {
             text-align: center;
             margin-top: 1.5rem;
@@ -1175,15 +1229,11 @@ function getHtml() {
             align-items: center;
             gap: 4px;
         }
-        .footer a:hover {
-            color: var(--accent);
-        }
+        .footer a:hover { color: var(--accent); }
         .global-section {
             margin: 1rem 0;
             padding: 1rem;
             background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border-radius: 14px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
@@ -1198,6 +1248,8 @@ function getHtml() {
             <h1>DOH-ECH 查询</h1>
         </div>
         <p class="subtitle">智能 DNS 解析 · ECH 注入 · ECS 就近解析</p>
+        
+        <!-- 域名和类型 -->
         <label for="domain">查询域名</label>
         <input type="text" id="domain" placeholder="输入域名，例如 twitter.com" value="twitter.com" autofocus>
         <div class="row">
@@ -1218,54 +1270,84 @@ function getHtml() {
                 </select>
             </div>
         </div>
-        <div class="global-section">
-            <label for="best">全局跟随优选</label>
-            <select id="best" style="margin-bottom:0">
-                <option value="false">否 (仅静态域名)</option>
-                <option value="true">是 (所有 CF/Meta 域名)</option>
-            </select>
+
+        <!-- 全局优选勾选框 -->
+        <div class="toggle-row">
+            <label class="checkbox-container">
+                <input type="checkbox" id="best" onchange="updateBestLabel()">
+                <span class="checkmark"></span>
+                <span id="bestLabel">非静态域名跟随优选</span>
+            </label>
         </div>
+
+        <!-- Cloudflare 高级参数 -->
         <div id="cfParams" class="advanced-section">
-            <div class="param-group active" id="cfGroup">
-                <label>Cloudflare IPv4 <span class="badge badge-cf">ip4</span></label>
-                <input type="text" id="ip4" placeholder="1.2.3.4, 5.6.7.8">
-                <label>Cloudflare IPv6 <span class="badge badge-cf">ip6</span></label>
-                <input type="text" id="ip6" placeholder="2606:4700::, 2606:4700::1">
-                <label>CF 优选域名 <span class="badge badge-cf">cf</span></label>
-                <input type="text" id="cfDomain" placeholder="example.com, example2.com">
-                <label>ECH Outer-SNI  <span class="badge badge-cf">ech</span></label>
-                <input type="text" id="echDomain" placeholder="cloudflare-ech.com">
-                <label>优选订阅 (ip-URL 或 cf-URL，多个用逗号分隔)  <span class="badge badge-cf">sub</span></label>
-                <input type="text" id="sub" placeholder="ip-https://... 或 cf-https://... , ...">
-                <label>排除项 (逗号分隔)  <span class="badge badge-cf">exclude</span></label>
-                <input type="text" id="exclude" placeholder="1.2.3.4,bad.example.com">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.8rem;">
-                    <label for="shuffle" style="margin-bottom:0;">随机乱序 IP  <span class="badge badge-cf">shuffle</span></label>
-                    <input type="checkbox" id="shuffle" checked style="width:auto;margin-bottom:0;">
+            <div class="param-grid">
+                <div>
+                    <label>Cloudflare IPv4 <span class="badge badge-cf">ip4</span></label>
+                    <input type="text" id="ip4" placeholder="1.2.3.4, 5.6.7.8">
+                </div>
+                <div>
+                    <label>Cloudflare IPv6 <span class="badge badge-cf">ip6</span></label>
+                    <input type="text" id="ip6" placeholder="2606:4700::, 2606:4700::1">
+                </div>
+                <div>
+                    <label>解析域名获取 IP <span class="badge badge-cf">cf</span></label>
+                    <input type="text" id="cfDomain" placeholder="example.com, example2.com">
+                </div>
+                <div>
+                    <label>ECH 来源域名 <span class="badge badge-cf">ech</span></label>
+                    <input type="text" id="echDomain" placeholder="cloudflare-ech.com">
+                </div>
+                <div>
+                    <label>优选订阅 <span class="badge badge-cf">sub</span></label>
+                    <input type="text" id="sub" placeholder="ip-URL 或 cf-URL，逗号分隔">
+                </div>
+                <div>
+                    <label>排除项 <span class="badge badge-cf">exclude</span></label>
+                    <input type="text" id="exclude" placeholder="1.2.3.4,bad.example.com">
+                </div>
+            </div>
+            <div class="toggle-row" style="margin-top: 0.5rem;">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="shuffle" checked>
+                    <span class="checkmark"></span>
+                    <span>随机乱序 IP</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Meta 高级参数 -->
+        <div id="metaParams" class="advanced-section">
+            <div class="param-grid">
+                <div>
+                    <label>Meta IPv4 <span class="badge badge-meta">metaIp4</span></label>
+                    <input type="text" id="metaIp4" placeholder="157.240.1.1, 157.240.2.1">
+                </div>
+                <div>
+                    <label>Meta IPv6 <span class="badge badge-meta">metaIp6</span></label>
+                    <input type="text" id="metaIp6" placeholder="2a03:2880:...">
+                </div>
+                <div>
+                    <label>解析域名获取 IP <span class="badge badge-meta">meta</span></label>
+                    <input type="text" id="metaDomain" placeholder="meta-better.example.com">
                 </div>
             </div>
         </div>
-        <div id="metaParams" class="advanced-section">
-            <div class="param-group active" id="metaGroup">
-                <label>Meta IPv4 <span class="badge badge-meta">metaIp4</span></label>
-                <input type="text" id="metaIp4" placeholder="157.240.1.1, 157.240.2.1">
-                <label>Meta IPv6 <span class="badge badge-meta">metaIp6</span></label>
-                <input type="text" id="metaIp6" placeholder="2a03:2880:...">
-                <label>Meta 优选域名 <span class="badge badge-meta">meta</span></label>
-                <input type="text" id="metaDomain" placeholder="meta-better.example.com">
-            </div>
-        </div>
+
+        <!-- 自定义 Client IP -->
         <div class="global-section">
             <label for="clientIp">自定义 Client IP (ECS) <span style="font-weight:normal;font-size:0.8em;">留空自动获取</span></label>
             <input type="text" id="clientIp" placeholder="8.8.8.8 或 IPv6" style="margin-bottom:0">
         </div>
+
         <button id="queryBtn" onclick="doQuery()">
             <span id="btnText">🔍 开始查询</span>
         </button>
         <div id="result" class="result-box" style="display: none;"></div>
         <div class="footer">
             <span>DOH-ECH · Cloudflare Pages · </span>
-            <a href="https://github.com/rosenii" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/rosenii/doh-ech" target="_blank" rel="noopener noreferrer">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
                 </svg>
@@ -1279,6 +1361,12 @@ function getHtml() {
             document.getElementById('cfParams').classList.toggle('show', mode === 'cf');
             document.getElementById('metaParams').classList.toggle('show', mode === 'meta');
         }
+
+        function updateBestLabel() {
+            const checked = document.getElementById('best').checked;
+            document.getElementById('bestLabel').textContent = checked ? '非静态域名跟随优选' : '非静态域名跟随优选（关闭）';
+        }
+
         async function doQuery() {
             const domain = document.getElementById('domain').value.trim();
             const type = document.getElementById('type').value;
@@ -1295,8 +1383,10 @@ function getHtml() {
             const params = new URLSearchParams();
             params.set('domain', domain);
             params.set('type', type);
-            const best = document.getElementById('best').value;
-            params.set('best', best);
+            
+            // 全局优选 (checkbox)
+            const bestChecked = document.getElementById('best').checked;
+            params.set('best', bestChecked ? 'true' : 'false');
 
             if (mode === 'cf') {
                 const ip4 = document.getElementById('ip4').value.trim();
@@ -1305,15 +1395,14 @@ function getHtml() {
                 const echDomain = document.getElementById('echDomain').value.trim();
                 const sub = document.getElementById('sub').value.trim();
                 const exclude = document.getElementById('exclude').value.trim();
-                const shuffleCheckbox = document.getElementById('shuffle');
-                const shuffle = shuffleCheckbox.checked ? 'true' : 'false';
+                const shuffleChecked = document.getElementById('shuffle').checked;
                 if (ip4) params.set('ip4', ip4);
                 if (ip6) params.set('ip6', ip6);
                 if (cfDomain) params.set('cf', cfDomain);
                 if (echDomain) params.set('ech', echDomain);
                 if (sub) params.set('sub', sub);
                 if (exclude) params.set('exclude', exclude);
-                params.set('shuffle', shuffle);
+                params.set('shuffle', shuffleChecked ? 'true' : 'false');
             } else if (mode === 'meta') {
                 const metaIp4 = document.getElementById('metaIp4').value.trim();
                 const metaIp6 = document.getElementById('metaIp6').value.trim();
@@ -1348,6 +1437,9 @@ function getHtml() {
                 btnText.textContent = '🔍 开始查询';
             }
         }
+
+        // 初始化 best 标签
+        updateBestLabel();
     </script>
 </body>
 </html>`;
