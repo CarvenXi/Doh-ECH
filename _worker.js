@@ -1,12 +1,14 @@
 /**
  * DOH-ECH 
- * - best 参数控制全局跟随优选
  * - 双上游竞速 + Edge 缓存
- * - CF/Meta 静态域名 + IPv6 + 仅 IPv4 排除
+ *- CF/Meta 静态域名 + IPv6 + 仅 IPv4 排除
  * - HTTPS hints 复用归属探测 IP
- * - ECS 支持 + 自定义 clientIp
- * - sub 多订阅缓存 + exclude 过滤
- * - 返回记录随机乱序开关 (shuffle 参数)
+ * - best参数 控制全局跟随优选，所有CF站点均使用配置的优选结果 默认false
+ * - clientIp参数 ECS支持，默认自动获取
+ * - cf参数 解析优选的域名记录返回
+ * - sub参数  多订阅缓存 
+ * - exclude参数 过滤排除不合适的优选ip/domain
+ * - shuffle 参数 返回记录随机乱序开关 默认false
  */
 
 const UPSTREAM_DNS_GOOGLE = 'https://dns.google/dns-query';
@@ -1389,8 +1391,8 @@ function getHtml() {
         </div>
 
         <div class="global-section">
-            <label for="clientIp">自定义 Client IP (ECS) <span style="font-weight:normal;font-size:0.8em;">留空自动获取</span></label>
-            <input type="text" id="clientIp" placeholder="8.8.8.8 或 IPv6" style="margin-bottom:0">
+            <label for="clientIp">自定义 ClientIP (ECS) <span style="font-weight:normal;font-size:0.8em;">留空自动获取</span></label>
+            <input type="text" id="clientIp" placeholder="1.2.4.8" style="margin-bottom:0">
         </div>
 
         <button id="queryBtn" onclick="doQuery()">
@@ -1424,7 +1426,7 @@ function getHtml() {
 
         function updateBestLabel() {
             const checked = document.getElementById('best').checked;
-            document.getElementById('bestLabel').textContent = checked ? '全局跟随优选' : '全局跟随优选（关）';
+            document.getElementById('bestLabel').textContent = checked ? '全局跟随优选(开)' : '全局跟随优选(关)';
         }
 
         async function copyUrl() {
