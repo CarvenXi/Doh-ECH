@@ -1087,7 +1087,7 @@ function getHtml() {
             font-size: 0.5rem;
             font-weight: 600;
             margin-left: 3px;
-            margin-bottom: 1px;
+            margin-bottom: 2px;
             background: rgba(255,255,255,0.15);
             vertical-align: middle;
         }
